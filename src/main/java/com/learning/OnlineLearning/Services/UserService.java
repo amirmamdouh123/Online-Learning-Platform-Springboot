@@ -1,6 +1,7 @@
 package com.learning.OnlineLearning.Services;
 
 import com.learning.OnlineLearning.Entities.Authority;
+import com.learning.OnlineLearning.Entities.Course;
 import com.learning.OnlineLearning.Repos.UserRepo;
 import org.aspectj.lang.annotation.Around;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.learning.OnlineLearning.Entities.User;
 
 import javax.naming.AuthenticationException;
+import javax.naming.NameNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -52,8 +54,16 @@ public class UserService implements UserDetailsService {
         }
         if( user.getAuthorities() == null || user.getAuthorities().isEmpty()){  //by default the new user will be has Student roles
             Authority authority=authorityService.getByName("ROLE_Student");
-            user.setAuthorities(Set.of(authority));
+            user.setAuthorities(List.of(authority));
         }
         return userRepo.save(user);
+    }
+
+    public User getUserByEmail(String  name) throws NameNotFoundException {
+        Optional<User> course=userRepo.findByEmail(name);
+        if(course.isPresent()){
+            return course.get();
+        }
+        throw new NameNotFoundException("User email is not Matched..");
     }
 }

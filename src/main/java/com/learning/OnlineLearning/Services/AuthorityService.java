@@ -14,5 +14,8 @@ public class AuthorityService {
     public Authority getByName(String name){
         return authorityRepo.getByName(name).orElseThrow();
     }
+    public Authority getById(Long id){
+        return authorityRepo.findById(id).orElseThrow(()-> new IllegalArgumentException("id is not found"));
+    }
 
 }

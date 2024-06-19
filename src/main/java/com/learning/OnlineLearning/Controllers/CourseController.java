@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.naming.NameNotFoundException;
 import java.util.List;
@@ -21,14 +18,14 @@ public class CourseController {
     @Autowired
     CourseService courseService;
 
-    @GetMapping
-    @PreAuthorize("hasRole('Student')")
+    @GetMapping  //all
     public List<Course> getAllCourses(){
         return courseService.getAllCourses();
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<?> getCourseById(@PathVariable("{id}") Long id){
+    @GetMapping("/id/{id}")
+    //all
+    public ResponseEntity<?> getCourseById(@PathVariable("id") Long id){
         try {
             return ResponseEntity.ok(courseService.getCourseById(id));
         }
@@ -36,4 +33,49 @@ public class CourseController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<?> getCourseByName(@PathVariable("name") String name){
+        try {
+            System.out.println("name: "+name);
+            return ResponseEntity.ok(courseService.getCourseByName(name));
+        }
+        catch (NameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('Admin')")
+    public ResponseEntity<?> insertNewCourse(@RequestBody Course course){
+        try {
+            return ResponseEntity.ok(courseService.insertCourse(course));
+        }
+        catch (NameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/update/{id}")
+    @PreAuthorize("hasRole('Admin') || hasRole('Instructor') ")
+    public ResponseEntity<?> updateCourse(@PathVariable Long id ,@RequestBody Course course){
+        try {
+            return ResponseEntity.ok(courseService.updateCourse(id ,course));
+        }
+        catch (NameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/delete/{name}")
+    @PreAuthorize("hasRole('Admin')")
+    public ResponseEntity<?> deleteCourse(@PathVariable("name") String name){
+        try {
+            return ResponseEntity.ok(courseService.deleteByName(name));
+        }
+        catch (NameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

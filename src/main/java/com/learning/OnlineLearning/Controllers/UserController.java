@@ -1,10 +1,13 @@
 package com.learning.OnlineLearning.Controllers;
 
 import com.learning.OnlineLearning.DTOS.LoginUser;
+import com.learning.OnlineLearning.Entities.Authority;
 import com.learning.OnlineLearning.Entities.User;
 import com.learning.OnlineLearning.JwtUtities.JwtService;
+import com.learning.OnlineLearning.Services.AuthorityService;
 import com.learning.OnlineLearning.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -13,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.NameNotFoundException;
 import java.util.List;
 
 @RestController
@@ -32,10 +36,18 @@ public class UserController {
     @Autowired
     JwtService jwtService;
 
+    @Autowired
+    AuthorityService authorityService;
+
 
     @PostMapping("register")
     public User insertUser(@RequestBody User user){
         System.out.println("register");
+        List<Authority> userAuthorities =user.getAuthorities()
+                .stream().map((auth)->
+                            authorityService.getById( ( (Authority) auth).getId()) )
+                .toList();
+        user.setAuthorities(userAuthorities);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userService.insertUser(user);
     }
@@ -59,6 +71,17 @@ public class UserController {
         UserDetails user = userService.loadUserByUsername(login.getName());
         String jwt= jwtService.generateJWT(user);
         return jwt;
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<?> getUserByName(@PathVariable("email") String email){
+        try {
+            System.out.println("email: "+email);
+            return ResponseEntity.ok(userService.getUserByEmail(email));
+        }
+        catch (NameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

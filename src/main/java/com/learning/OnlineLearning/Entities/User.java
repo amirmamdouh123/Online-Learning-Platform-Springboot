@@ -29,7 +29,7 @@ public class User implements UserDetails{
             schema = "onlinelearning",
             joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id",referencedColumnName = "id"))
-    Set<Authority> authorities=new HashSet<>();
+    List<Authority> authorities=new ArrayList<>();
 
     private boolean accountNonExpired=true;
 
