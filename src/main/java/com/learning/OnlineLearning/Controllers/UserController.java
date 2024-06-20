@@ -84,4 +84,9 @@ public class UserController {
         }
     }
 
+    @GetMapping("/authority/{auth}")
+    public List<User> getUsersByAuthority(@PathVariable("auth") String auth){
+        return userService.getUsersByAuthority(auth);
+    }
+
 }

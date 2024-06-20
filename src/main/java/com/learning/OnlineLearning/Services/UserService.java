@@ -2,14 +2,17 @@ package com.learning.OnlineLearning.Services;
 
 import com.learning.OnlineLearning.Entities.Authority;
 import com.learning.OnlineLearning.Entities.Course;
+import com.learning.OnlineLearning.Events.UserRegistrationEvent;
 import com.learning.OnlineLearning.Repos.UserRepo;
 import org.aspectj.lang.annotation.Around;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.learning.OnlineLearning.Entities.User;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.AuthenticationException;
 import javax.naming.NameNotFoundException;
@@ -26,6 +29,8 @@ public class UserService implements UserDetailsService {
     @Autowired
     AuthorityService authorityService;
 
+    @Autowired
+    ApplicationEventPublisher applicationEventPublisher;
 
     public List<User> getAllUsers(){
         return userRepo.findAll();
@@ -47,6 +52,7 @@ public class UserService implements UserDetailsService {
     }
 
     //register
+    @Transactional
     public User insertUser(User user){
         Optional<User> currentUser= userRepo.findByEmail(user.getEmail());
         if(currentUser.isPresent()){
@@ -56,6 +62,7 @@ public class UserService implements UserDetailsService {
             Authority authority=authorityService.getByName("ROLE_Student");
             user.setAuthorities(List.of(authority));
         }
+        applicationEventPublisher.publishEvent(new UserRegistrationEvent(user.getEmail()));
         return userRepo.save(user);
     }
 
@@ -66,4 +73,10 @@ public class UserService implements UserDetailsService {
         }
         throw new NameNotFoundException("User email is not Matched..");
     }
+
+
+    public List<User> getUsersByAuthority(String  name) {
+        return userRepo.getUsersByAuthority(name);
+    }
+
 }

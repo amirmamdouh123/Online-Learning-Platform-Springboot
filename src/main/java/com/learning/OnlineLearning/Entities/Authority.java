@@ -15,6 +15,7 @@ public class Authority implements GrantedAuthority {
     String name;
 
 
+    @ManyToMany(mappedBy = "authorities")
     List<User> users;
 
 

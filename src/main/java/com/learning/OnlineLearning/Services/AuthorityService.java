@@ -18,4 +18,5 @@ public class AuthorityService {
         return authorityRepo.findById(id).orElseThrow(()-> new IllegalArgumentException("id is not found"));
     }
 
+
 }
